@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lakou Sces Infirmières — Archives et communauté des sciences infirmières</title>
+<meta name="description" content="Plateforme d'archives académiques, de stages et de recherche pour les étudiant·e·s en sciences infirmières en Haïti.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <img class="hero-bg" src="images/hero-collectif-soins.jpg" alt="">
+  <div class="hero-content">
+    <span class="hero-eyebrow">● Réseau Lakou Santé</span>
+    <h1 class="hero-title">Le savoir infirmier,<br><em>transmis en continu</em></h1>
+    <p class="hero-sub">Archives académiques, stages, recherche et communauté — pensé par et pour les étudiant·e·s en sciences infirmières en Haïti.</p>
+    <div class="hero-actions">
+      <a href="inscription.html" class="btn-primary">Rejoindre la plateforme →</a>
+      <a href="#bannieres" class="btn-secondary">Découvrir les bannières</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num" id="stat-inscrits">—</div>
+        <div class="hero-stat-label">inscrit·e·s</div>
+      </div>
+      <div>
+        <div class="hero-stat-num" id="stat-archives">—</div>
+        <div class="hero-stat-label">archives validées</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">5</div>
+        <div class="hero-stat-label">bannières</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUI SOMMES-NOUS ============ -->
+<section class="split-section">
+  <div class="split-image">
+    <img src="images/qui-sommes-nous.jpg" alt="Étudiant·e·s en sciences infirmières en stage">
+    <div class="split-image-badge">
+      <strong>5</strong>
+      Bannières, une seule plateforme
+    </div>
+  </div>
+  <div class="split-content">
+    <p class="split-eyebrow">— Qui sommes-nous</p>
+    <h2>Une mémoire vivante pour la profession infirmière</h2>
+    <p>Lakou Sces Infirmières archive ce qui, ailleurs, disparaît avec le temps : rapports de stage, protocoles de soins, mémoires de recherche, initiatives de terrain.</p>
+    <p>Chaque promotion enrichit la suivante. Un stage en santé communautaire aux Cayes en 2026 reste consultable dans dix ans.</p>
+    <ul class="checklist">
+      <li>Archives académiques organisées par bannière</li>
+      <li>Validation par les enseignant·e·s avant publication</li>
+      <li>Espace communautaire — forum, revue, initiatives</li>
+    </ul>
+    <a href="a-propos.html" class="btn-secondary">Notre histoire →</a>
+  </div>
+</section>
+
+<!-- ============ 5 BANNIÈRES ============ -->
+<section class="banners-section" id="bannieres">
+  <div class="banners-intro">
+    <p class="split-eyebrow">— Ce que couvre la plateforme</p>
+    <h2>Formation, soins, terrain, recherche, transmission</h2>
+    <p>Chaque bannière archive un aspect distinct du parcours infirmier — de la salle de cours au terrain, jusqu'à la recherche et la communauté.</p>
+  </div>
+
+  <div class="banner-grid">
+
+    <a href="index.html#formation" class="banner-card" id="formation">
+      <svg class="banner-card-tick" viewBox="0 0 300 10" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="300" height="10" fill="#f7ecef"/>
+        <g stroke="#9c6b74" stroke-width="1.5">
+          <line x1="10" y1="0" x2="10" y2="6"/><line x1="30" y1="0" x2="30" y2="4"/><line x1="50" y1="0" x2="50" y2="4"/><line x1="70" y1="0" x2="70" y2="6"/>
+          <line x1="90" y1="0" x2="90" y2="4"/><line x1="110" y1="0" x2="110" y2="4"/><line x1="130" y1="0" x2="130" y2="6"/><line x1="150" y1="0" x2="150" y2="4"/>
+          <line x1="170" y1="0" x2="170" y2="4"/><line x1="190" y1="0" x2="190" y2="6"/><line x1="210" y1="0" x2="210" y2="4"/><line x1="230" y1="0" x2="230" y2="4"/>
+          <line x1="250" y1="0" x2="250" y2="6"/><line x1="270" y1="0" x2="270" y2="4"/><line x1="290" y1="0" x2="290" y2="4"/>
+        </g>
+      </svg>
+      <div class="banner-card-body">
+        <div class="banner-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg></div>
+        <p class="banner-card-title">Formation & Révisions</p>
+        <p class="banner-card-desc">Cours, fiches de révision, examens et TP archivés par promotion.</p>
+        <span class="banner-card-link">Explorer →</span>
+      </div>
+    </a>
+
+    <a href="index.html#stages" class="banner-card" id="stages">
+      <svg class="banner-card-tick" viewBox="0 0 300 10" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="300" height="10" fill="#f7ecef"/>
+        <g stroke="#9c6b74" stroke-width="1.5">
+          <line x1="10" y1="0" x2="10" y2="6"/><line x1="30" y1="0" x2="30" y2="4"/><line x1="50" y1="0" x2="50" y2="4"/><line x1="70" y1="0" x2="70" y2="6"/>
+          <line x1="90" y1="0" x2="90" y2="4"/><line x1="110" y1="0" x2="110" y2="4"/><line x1="130" y1="0" x2="130" y2="6"/><line x1="150" y1="0" x2="150" y2="4"/>
+          <line x1="170" y1="0" x2="170" y2="4"/><line x1="190" y1="0" x2="190" y2="6"/><line x1="210" y1="0" x2="210" y2="4"/><line x1="230" y1="0" x2="230" y2="4"/>
+          <line x1="250" y1="0" x2="250" y2="6"/><line x1="270" y1="0" x2="270" y2="4"/><line x1="290" y1="0" x2="290" y2="4"/>
+        </g>
+      </svg>
+      <div class="banner-card-body">
+        <div class="banner-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V9l8-6 8 6v12"/><path d="M12 21v-7M9 17h6"/></svg></div>
+        <p class="banner-card-title">Stages & Terrain</p>
+        <p class="banner-card-desc">Rapports de stage, santé communautaire, expériences en milieu rural.</p>
+        <span class="banner-card-link">Explorer →</span>
+      </div>
+    </a>
+
+    <a href="index.html#pratiques" class="banner-card" id="pratiques">
+      <svg class="banner-card-tick" viewBox="0 0 300 10" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="300" height="10" fill="#f7ecef"/>
+        <g stroke="#9c6b74" stroke-width="1.5">
+          <line x1="10" y1="0" x2="10" y2="6"/><line x1="30" y1="0" x2="30" y2="4"/><line x1="50" y1="0" x2="50" y2="4"/><line x1="70" y1="0" x2="70" y2="6"/>
+          <line x1="90" y1="0" x2="90" y2="4"/><line x1="110" y1="0" x2="110" y2="4"/><line x1="130" y1="0" x2="130" y2="6"/><line x1="150" y1="0" x2="150" y2="4"/>
+          <line x1="170" y1="0" x2="170" y2="4"/><line x1="190" y1="0" x2="190" y2="6"/><line x1="210" y1="0" x2="210" y2="4"/><line x1="230" y1="0" x2="230" y2="4"/>
+          <line x1="250" y1="0" x2="250" y2="6"/><line x1="270" y1="0" x2="270" y2="4"/><line x1="290" y1="0" x2="290" y2="4"/>
+        </g>
+      </svg>
+      <div class="banner-card-body">
+        <div class="banner-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21c-5-3.5-8-7-8-11a5 5 0 0110-1 5 5 0 0110 1c0 4-3 7.5-8 11z"/></svg></div>
+        <p class="banner-card-title">Pratiques & Soins</p>
+        <p class="banner-card-desc">Techniques de soins, protocoles étudiés, simulations, innovations étudiantes.</p>
+        <span class="banner-card-link">Explorer →</span>
+      </div>
+    </a>
+
+    <a href="index.html#memoires" class="banner-card" id="memoires">
+      <svg class="banner-card-tick" viewBox="0 0 300 10" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="300" height="10" fill="#f7ecef"/>
+        <g stroke="#9c6b74" stroke-width="1.5">
+          <line x1="10" y1="0" x2="10" y2="6"/><line x1="30" y1="0" x2="30" y2="4"/><line x1="50" y1="0" x2="50" y2="4"/><line x1="70" y1="0" x2="70" y2="6"/>
+          <line x1="90" y1="0" x2="90" y2="4"/><line x1="110" y1="0" x2="110" y2="4"/><line x1="130" y1="0" x2="130" y2="6"/><line x1="150" y1="0" x2="150" y2="4"/>
+          <line x1="170" y1="0" x2="170" y2="4"/><line x1="190" y1="0" x2="190" y2="6"/><line x1="210" y1="0" x2="210" y2="4"/><line x1="230" y1="0" x2="230" y2="4"/>
+          <line x1="250" y1="0" x2="250" y2="6"/><line x1="270" y1="0" x2="270" y2="4"/><line x1="290" y1="0" x2="290" y2="4"/>
+        </g>
+      </svg>
+      <div class="banner-card-body">
+        <div class="banner-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <p class="banner-card-title">Mémoires & Recherche</p>
+        <p class="banner-card-desc">Mémoires, enquêtes, études de terrain — organisés par thématique.</p>
+        <span class="banner-card-link">Explorer →</span>
+      </div>
+    </a>
+
+    <a href="index.html#revue" class="banner-card banner-card-photo" id="revue">
+      <img src="images/revue-portrait.jpg" alt="Portrait d'un·e infirmier·ère de la communauté Lakou">
+      <div class="banner-card-body">
+        <div class="banner-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg></div>
+        <p class="banner-card-title">Revue Infirmière</p>
+        <p class="banner-card-desc">Portraits, initiatives, actualités — le cœur communautaire du réseau.</p>
+        <span class="banner-card-link">Explorer →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="view-all-wrap">
+    <a href="inscription.html" class="btn-primary">Rejoindre la plateforme →</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a></p>
+</footer>
+
+<script>
+(async function () {
+  try {
+    const { count: nbInscrits } = await window.supabaseClient
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+    document.getElementById('stat-inscrits').textContent = nbInscrits ?? 0;
+  } catch (e) { console.error('Compteur inscrits indisponible :', e); }
+
+  const TABLES = ['infirmiere_formation_revisions','infirmiere_stages_terrain','infirmiere_pratiques_soins','infirmiere_memoires_recherche','infirmiere_revue'];
+  try {
+    const reponses = await Promise.all(TABLES.map(function (t) {
+      return window.supabaseClient.from(t).select('*', { count: 'exact', head: true }).eq('status', 'valide');
+    }));
+    const total = reponses.reduce(function (sum, r) { return sum + (r.count || 0); }, 0);
+    document.getElementById('stat-archives').textContent = total;
+  } catch (e) { console.error('Compteur archives indisponible :', e); }
+})();
+</script>
+
+<script src="partials/nav.js"></script>
+</body>
+</html>
