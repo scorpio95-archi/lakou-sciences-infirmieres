@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Lakou Sces Infirmières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<div class="breadcrumb">
+  <a href="index.html">🏠 Lakou Sces Infirmières</a>
+  <span class="sep">›</span>
+  <span class="current">Tableau de bord</span>
+</div>
+<div style="text-align:right; padding:0 20px; margin-top:-4px;">
+  <a href="parametres.html" style="font-size:12.5px; color:var(--rose-fonce); text-decoration:none;">⚙️ Paramètres</a>
+</div>
+
+<main class="auth-main dashboard-grid">
+  <div class="auth-card" id="carte-chargement">
+    <p class="auth-sub" style="margin:0;">Chargement de ton espace…</p>
+  </div>
+
+  <div class="auth-card" id="carte-dashboard" style="display:none;">
+    <div class="auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-5 6 5v10M10 19v-6h4v6"/></svg>
+    </div>
+    <h1 id="titre-bienvenue">Bonjour</h1>
+    <p class="auth-sub" id="sous-titre-role"></p>
+
+    <a href="parametres.html" class="banniere-enseignant" id="banniere-enseignant" style="display:none;">
+       Tu es enseignant·e ? <strong>Demande ton statut dans Paramètres →</strong>
+    </a>
+
+    <a href="index.html" class="btn-primary" style="display:block; text-decoration:none; margin-top:6px;">Retour à l'accueil</a>
+  </div>
+
+  <div class="auth-card" id="carte-soumissions" style="display:none;">
+    <h1 style="font-size:19px; text-align:left;">Mes soumissions</h1>
+    <p class="auth-sub" style="text-align:left; margin-bottom:18px;">Tapote le bouton + en bas pour en ajouter une nouvelle.</p>
+    <div id="liste-soumissions"><p class="auth-sub">Chargement…</p></div>
+  </div>
+
+  <div class="auth-card" id="carte-stats" style="display:none;">
+    <h1 style="font-size:19px; text-align:left;">Statistiques — Sces Infirmières</h1>
+    <p class="auth-sub" style="text-align:left; margin-bottom:18px;">Visible uniquement par les admins.</p>
+
+    <div class="stats-inscrits">
+      <span class="stats-live-dot"></span>
+      <span id="stats-inscrits-nombre">—</span>
+      <span class="stats-inscrits-label">inscrit·e·s</span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stats-card attente">
+        <span class="stats-card-nombre" id="stat-en_attente">—</span>
+        <span class="stats-card-label">Soumis</span>
+      </div>
+      <div class="stats-card valide">
+        <span class="stats-card-nombre" id="stat-valide">—</span>
+        <span class="stats-card-label">Validé</span>
+      </div>
+      <div class="stats-card rejete">
+        <span class="stats-card-nombre" id="stat-rejete">—</span>
+        <span class="stats-card-label">Rejeté</span>
+      </div>
+    </div>
+
+    <p class="stats-chart-titre">Activité — 14 derniers jours</p>
+    <canvas id="stats-chart" height="140"></canvas>
+
+    <button class="btn-primary" id="btn-rapport" style="margin-top:20px;">Envoyer un rapport</button>
+    <div class="auth-form-message" id="rapport-msg"></div>
+  </div>
+
+  <div class="auth-card" id="carte-admin" style="display:none;">
+    <h1 style="font-size:19px; text-align:left;">Utilisateurs — Sces Infirmières</h1>
+    <p class="auth-sub" style="text-align:left; margin-bottom:18px;">Visible uniquement par les admins. Change le rôle d'un compte au besoin.</p>
+
+    <div id="zone-demandes"></div>
+
+    <div id="liste-utilisateurs"><p class="auth-sub">Chargement…</p></div>
+  </div>
+</main>
+
+<!-- ---------- FAB : nouvelle soumission (5 bannières) ---------- -->
+<div class="fab-container" id="fab-container">
+  <div class="fab-menu" id="fab-menu">
+    <button class="fab-item" data-type="formation">
+      <span class="fab-badge badge-gelule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg></span>
+      <span class="fab-label">Formation & Révisions</span>
+    </button>
+    <button class="fab-item" data-type="stages">
+      <span class="fab-badge badge-hospitaliere"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V9l8-6 8 6v12"/><path d="M12 21v-7M9 17h6"/></svg></span>
+      <span class="fab-label">Stages & Terrain</span>
+    </button>
+    <button class="fab-item" data-type="pratiques">
+      <span class="fab-badge badge-goutte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l5 8a5 5 0 11-10 0l5-8z"/></svg></span>
+      <span class="fab-label">Pratiques & Soins</span>
+    </button>
+    <button class="fab-item" data-type="memoires">
+      <span class="fab-badge badge-feuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+      <span class="fab-label">Mémoires & Recherche</span>
+    </button>
+    <button class="fab-item" data-type="revue">
+      <span class="fab-badge badge-revue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg></span>
+      <span class="fab-label">Revue Infirmière</span>
+    </button>
+  </div>
+  <button class="fab-main" id="fab-main" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</div>
+
+<!-- ---------- Modal générique de soumission ---------- -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-card">
+    <button class="modal-close" id="modal-close">&times;</button>
+    <h2 id="modal-titre">Titre</h2>
+    <div class="auth-form-message" id="modal-msg"></div>
+    <form id="modal-form"></form>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+
+  if (!session) {
+    window.location.href = 'connexion.html';
+    return;
+  }
+
+  const { data: profil, error } = await window.supabaseClient
+    .from('profiles')
+    .select('nom_complet, role')
+    .eq('id', session.user.id)
+    .single();
+
+  document.getElementById('carte-chargement').style.display = 'none';
+  document.getElementById('carte-dashboard').style.display = 'block';
+
+  var nom = profil && profil.nom_complet ? profil.nom_complet : session.user.email;
+  var role = profil && profil.role ? profil.role : 'etudiant';
+
+  document.getElementById('titre-bienvenue').textContent = 'Bonjour, ' + nom;
+  document.getElementById('sous-titre-role').textContent =
+    'Connecté·e en tant que ' + role + ' — Lakou Sces Infirmières';
+
+  if (role === 'etudiant') {
+    document.getElementById('banniere-enseignant').style.display = 'flex';
+  }
+
+  document.getElementById('carte-soumissions').style.display = 'block';
+  chargerMesSoumissions(session.user.id);
+
+  if (role === 'admin') {
+    document.getElementById('carte-stats').style.display = 'block';
+    document.getElementById('carte-admin').style.display = 'block';
+    chargerStatistiques();
+    chargerUtilisateurs();
+  }
+})();
+
+const TYPES_SOUMISSION = [
+  { table:'infirmiere_formation_revisions', label:'Formation & Révisions', badge:'badge-gelule' },
+  { table:'infirmiere_stages_terrain', label:'Stages & Terrain', badge:'badge-hospitaliere' },
+  { table:'infirmiere_pratiques_soins', label:'Pratiques & Soins', badge:'badge-goutte' },
+  { table:'infirmiere_memoires_recherche', label:'Mémoires & Recherche', badge:'badge-feuille' },
+  { table:'infirmiere_revue', label:'Revue Infirmière', badge:'badge-revue' }
+];
+
+const LIBELLE_STATUT = {
+  en_attente: { texte: 'En attente', classe: 'attente' },
+  valide:     { texte: 'Validé',      classe: 'valide' },
+  rejete:     { texte: 'Rejeté',      classe: 'rejete' }
+};
+
+async function chargerMesSoumissions(userId){
+  const conteneur = document.getElementById('liste-soumissions');
+
+  const reponses = await Promise.all(TYPES_SOUMISSION.map(function(t){
+    return window.supabaseClient
+      .from(t.table)
+      .select('id, status, created_at, titre, type')
+      .eq('user_id', userId);
+  }));
+
+  let items = [];
+  reponses.forEach(function(reponse, i){
+    if (reponse.error || !reponse.data) return;
+    const type = TYPES_SOUMISSION[i];
+    reponse.data.forEach(function(ligne){
+      items.push({
+        titre: ligne.titre || '(sans titre)',
+        label: type.label,
+        badge: type.badge,
+        status: ligne.status,
+        created_at: ligne.created_at
+      });
+    });
+  });
+
+  items.sort(function(a,b){ return new Date(b.created_at) - new Date(a.created_at); });
+
+  if (items.length === 0) {
+    conteneur.innerHTML = '<p class="auth-sub">Aucune soumission pour le moment — tapote le bouton + en bas.</p>';
+    return;
+  }
+
+  conteneur.innerHTML = '';
+  items.forEach(function(item){
+    const statut = LIBELLE_STATUT[item.status] || { texte: item.status, classe: 'attente' };
+    const ligne = document.createElement('div');
+    ligne.className = 'soumission-row';
+    ligne.innerHTML =
+      '<span class="soumission-badge ' + item.badge + '"></span>' +
+      '<span class="soumission-info">' +
+        '<span class="soumission-titre">' + item.titre + '</span>' +
+        '<span class="soumission-type">' + item.label + '</span>' +
+      '</span>' +
+      '<span class="statut-pill ' + statut.classe + '">' + statut.texte + '</span>';
+    conteneur.appendChild(ligne);
+  });
+}
+
+/* =====================================================================
+   STATISTIQUES — admin uniquement
+===================================================================== */
+async function chargerStatistiques(){
+  const { count: nbInscrits } = await window.supabaseClient
+    .from('profiles')
+    .select('*', { count: 'exact', head: true });
+
+  document.getElementById('stats-inscrits-nombre').textContent = nbInscrits ?? 0;
+
+  window.supabaseClient
+    .channel('profiles-infirmiere')
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'profiles' },
+      function(){
+        const el = document.getElementById('stats-inscrits-nombre');
+        el.textContent = (parseInt(el.textContent, 10) || 0) + 1;
+      }
+    )
+    .subscribe();
+
+  const compteurs = { en_attente: 0, valide: 0, rejete: 0 };
+  const parJour = {};
+
+  const reponses = await Promise.all(TYPES_SOUMISSION.map(function(t){
+    return window.supabaseClient.from(t.table).select('status, created_at');
+  }));
+
+  reponses.forEach(function(reponse){
+    if (reponse.error || !reponse.data) return;
+    reponse.data.forEach(function(ligne){
+      if (compteurs[ligne.status] !== undefined) compteurs[ligne.status]++;
+      const jour = ligne.created_at.slice(0, 10);
+      parJour[jour] = (parJour[jour] || 0) + 1;
+    });
+  });
+
+  document.getElementById('stat-en_attente').textContent = compteurs.en_attente;
+  document.getElementById('stat-valide').textContent = compteurs.valide;
+  document.getElementById('stat-rejete').textContent = compteurs.rejete;
+
+  const jours = [];
+  const valeurs = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const cle = d.toISOString().slice(0, 10);
+    jours.push(cle.slice(5).replace('-', '/'));
+    valeurs.push(parJour[cle] || 0);
+  }
+
+  new Chart(document.getElementById('stats-chart'), {
+    type: 'bar',
+    data: {
+      labels: jours,
+      datasets: [{ data: valeurs, backgroundColor: '#a8677a', borderRadius: 4 }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+        x: { ticks: { font: { size: 9 } } }
+      }
+    }
+  });
+}
+
+document.getElementById('btn-rapport').addEventListener('click', async function(){
+  const btn = this;
+  const msg = document.getElementById('rapport-msg');
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+  msg.className = 'auth-form-message';
+
+  const { data, error } = await window.supabaseClient.functions.invoke('dynamic-responder');
+
+  btn.disabled = false;
+  btn.textContent = 'Envoyer un rapport';
+
+  if (error) {
+    msg.textContent = "Échec de l'envoi. Vérifie que la Edge Function est déployée.";
+    msg.className = 'auth-form-message show error';
+    return;
+  }
+
+  msg.textContent = 'Rapport envoyé par email.';
+  msg.className = 'auth-form-message show success';
+});
+
+async function chargerUtilisateurs(){
+  const conteneur = document.getElementById('liste-utilisateurs');
+  const zoneDemandes = document.getElementById('zone-demandes');
+
+  const { data: utilisateurs, error } = await window.supabaseClient
+    .from('profiles')
+    .select('id, nom_complet, role, created_at, demande_role, justification_role')
+    .order('created_at', { ascending: false });
+
+  // ---- demandes du rôle enseignant en attente ----
+  const demandes = (utilisateurs || []).filter(function(u){ return u.demande_role === 'enseignant'; });
+  zoneDemandes.innerHTML = '';
+  if (demandes.length > 0) {
+    demandes.forEach(function(d){
+      const carte = document.createElement('div');
+      carte.className = 'demande-card';
+      carte.innerHTML =
+        '<div class="demande-nom">' + (d.nom_complet || 'Sans nom') + ' <span class="demande-tag">demande enseignant</span></div>' +
+        '<p class="demande-justif">' + (d.justification_role || '(aucune justification fournie)') + '</p>' +
+        '<div class="demande-actions">' +
+          '<button class="demande-btn approuver" data-id="' + d.id + '">Approuver</button>' +
+          '<button class="demande-btn refuser" data-id="' + d.id + '">Refuser</button>' +
+        '</div>';
+      zoneDemandes.appendChild(carte);
+    });
+
+    zoneDemandes.querySelectorAll('.approuver').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        btn.disabled = true; btn.textContent = '…';
+        await window.supabaseClient.from('profiles').update({
+          role: 'enseignant', demande_role: null, justification_role: null
+        }).eq('id', btn.getAttribute('data-id'));
+        chargerUtilisateurs();
+      });
+    });
+    zoneDemandes.querySelectorAll('.refuser').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        btn.disabled = true; btn.textContent = '…';
+        await window.supabaseClient.from('profiles').update({
+          demande_role: null, justification_role: null
+        }).eq('id', btn.getAttribute('data-id'));
+        chargerUtilisateurs();
+      });
+    });
+  }
+
+  if (error || !utilisateurs) {
+    conteneur.innerHTML = '<p class="auth-sub">Impossible de charger la liste.</p>';
+    return;
+  }
+
+  if (utilisateurs.length === 0) {
+    conteneur.innerHTML = '<p class="auth-sub">Aucun inscrit pour le moment.</p>';
+    return;
+  }
+
+  conteneur.innerHTML = '';
+  utilisateurs.forEach(function(u){
+    const ligne = document.createElement('div');
+    ligne.className = 'user-row';
+    ligne.innerHTML =
+      '<span class="user-nom">' + (u.nom_complet || 'Sans nom') + '</span>' +
+      '<select class="user-role-select" data-id="' + u.id + '">' +
+        '<option value="etudiant"' + (u.role === 'etudiant' ? ' selected' : '') + '>Étudiant</option>' +
+        '<option value="enseignant"' + (u.role === 'enseignant' ? ' selected' : '') + '>Enseignant</option>' +
+        '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Admin</option>' +
+      '</select>' +
+      '<span class="user-statut" data-statut></span>';
+    conteneur.appendChild(ligne);
+  });
+
+  conteneur.querySelectorAll('.user-role-select').forEach(function(select){
+    select.addEventListener('change', async function(){
+      const id = select.getAttribute('data-id');
+      const nouveauRole = select.value;
+      const statutEl = select.parentElement.querySelector('[data-statut]');
+      statutEl.textContent = '…';
+
+      const { error } = await window.supabaseClient
+        .from('profiles')
+        .update({ role: nouveauRole })
+        .eq('id', id);
+
+      statutEl.textContent = error ? '✕' : '✓';
+      statutEl.className = error ? 'user-statut erreur' : 'user-statut ok';
+    });
+  });
+}
+
+/* =====================================================================
+   SOUMISSIONS — FAB + modal générique pour les 5 bannières
+   Chaque bannière porte un champ "type" (sous-catégorie) + champs communs.
+===================================================================== */
+const FORMULAIRES = {
+  formation: {
+    table: 'infirmiere_formation_revisions',
+    beniereKey: 'formation',
+    titre: 'Formation & Révisions',
+    urlChamp: 'fichier_url',
+    champs: [
+      { id:'type', label:'Type', type:'select', requis:true,
+        options:[['cours','Cours'],['fiche_revision','Fiche de révision'],['examen','Examen / sujet ancien'],['tp','TP'],['exercice','Exercice']] },
+      { id:'titre', label:'Titre', type:'text', requis:true },
+      { id:'description', label:'Description', type:'textarea' },
+      { id:'fichier', label:'Fichier (optionnel)', type:'file' }
+    ]
+  },
+  stages: {
+    table: 'infirmiere_stages_terrain',
+    beniereKey: 'stages',
+    titre: 'Stages & Terrain',
+    urlChamp: 'fichier_url',
+    champs: [
+      { id:'type', label:'Type', type:'select', requis:true,
+        options:[['rapport_stage','Rapport de stage'],['experience_hospitaliere','Expérience hospitalière'],['sante_communautaire','Santé communautaire'],['campagne_vaccination','Campagne de vaccination'],['sensibilisation','Sensibilisation'],['milieu_rural','Milieu rural'],['temoignage','Témoignage']] },
+      { id:'titre', label:'Titre', type:'text', requis:true },
+      { id:'lieu', label:'Lieu', type:'text', placeholder:'ex. Les Cayes' },
+      { id:'annee', label:'Année', type:'number', placeholder:'ex. 2026' },
+      { id:'description', label:'Description', type:'textarea' },
+      { id:'fichier', label:'Fichier (optionnel)', type:'file' }
+    ]
+  },
+  pratiques: {
+    table: 'infirmiere_pratiques_soins',
+    beniereKey: 'pratiques',
+    titre: 'Pratiques & Soins',
+    urlChamp: 'fichier_url',
+    champs: [
+      { id:'type', label:'Type', type:'select', requis:true,
+        options:[['technique_soins','Technique de soins'],['tp_infirmier','TP infirmier'],['protocole','Protocole étudié'],['simulation','Simulation'],['materiel_pedagogique','Matériel pédagogique'],['innovation','Innovation étudiante']] },
+      { id:'titre', label:'Titre', type:'text', requis:true },
+      { id:'description', label:'Description', type:'textarea' },
+      { id:'fichier', label:'Fichier (optionnel)', type:'file' }
+    ]
+  },
+  memoires: {
+    table: 'infirmiere_memoires_recherche',
+    beniereKey: 'memoires',
+    titre: 'Mémoires & Recherche',
+    urlChamp: 'fichier_url',
+    champs: [
+      { id:'type', label:'Type', type:'select', requis:true,
+        options:[['memoire','Mémoire'],['recherche','Recherche'],['enquete','Enquête'],['etude_terrain','Étude de terrain'],['poster','Poster scientifique'],['article','Article']] },
+      { id:'titre', label:'Titre', type:'text', requis:true },
+      { id:'tags', label:'Tags (séparés par virgule) *', type:'text', requis:true, placeholder:'ex. Santé maternelle, Pédiatrie' },
+      { id:'description', label:'Résumé', type:'textarea' },
+      { id:'fichier', label:'Fichier (optionnel)', type:'file' }
+    ]
+  },
+  revue: {
+    table: 'infirmiere_revue',
+    beniereKey: 'revue',
+    titre: 'Revue Infirmière',
+    urlChamp: 'fichier_url',
+    champs: [
+      { id:'type', label:'Type', type:'select', requis:true,
+        options:[['portrait','Portrait'],['parcours_ancien','Parcours d\'ancien étudiant'],['initiative','Initiative'],['association_promotion','Association / Promotion'],['actualite','Actualité'],['concours_opportunite','Concours / Opportunité'],['conference','Conférence'],['sur_le_terrain','Sur le terrain']] },
+      { id:'titre', label:'Titre', type:'text', requis:true },
+      { id:'description', label:'Chapô', type:'text', placeholder:'Une phrase qui donne envie de lire' },
+      { id:'contenu', label:'Contenu', type:'textarea' },
+      { id:'fichier', label:'Image (optionnel)', type:'file' }
+    ]
+  }
+};
+
+const fabContainer = document.getElementById('fab-container');
+const fabMain = document.getElementById('fab-main');
+const overlay = document.getElementById('modal-overlay');
+const modalForm = document.getElementById('modal-form');
+const modalTitre = document.getElementById('modal-titre');
+const modalMsg = document.getElementById('modal-msg');
+
+fabMain.addEventListener('click', function(){
+  var open = fabMain.getAttribute('aria-expanded') === 'true';
+  fabMain.setAttribute('aria-expanded', String(!open));
+  fabContainer.classList.toggle('open', !open);
+});
+
+document.querySelectorAll('.fab-item').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    ouvrirFormulaire(btn.getAttribute('data-type'));
+    fabMain.setAttribute('aria-expanded', 'false');
+    fabContainer.classList.remove('open');
+  });
+});
+
+function ouvrirFormulaire(type){
+  const config = FORMULAIRES[type];
+  modalTitre.textContent = config.titre;
+  modalMsg.className = 'auth-form-message';
+  modalForm.innerHTML = '';
+  modalForm.setAttribute('data-type', type);
+
+  config.champs.forEach(function(champ){
+    var wrap = document.createElement('div');
+    wrap.className = 'field';
+    var label = document.createElement('label');
+    label.textContent = champ.label + (champ.requis ? ' *' : '');
+    label.setAttribute('for', 'champ-' + champ.id);
+    wrap.appendChild(label);
+
+    var input;
+    if (champ.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.rows = 3;
+    } else if (champ.type === 'select') {
+      input = document.createElement('select');
+      champ.options.forEach(function(opt){
+        var o = document.createElement('option');
+        o.value = opt[0]; o.textContent = opt[1];
+        input.appendChild(o);
+      });
+    } else {
+      input = document.createElement('input');
+      input.type = champ.type;
+      if (champ.placeholder) input.placeholder = champ.placeholder;
+    }
+    input.id = 'champ-' + champ.id;
+    input.name = champ.id;
+    if (champ.requis) input.required = true;
+    wrap.appendChild(input);
+    modalForm.appendChild(wrap);
+  });
+
+  var btn = document.createElement('button');
+  btn.type = 'submit';
+  btn.className = 'btn-primary';
+  btn.textContent = 'Soumettre';
+  modalForm.appendChild(btn);
+
+  overlay.classList.add('open');
+}
+
+document.getElementById('modal-close').addEventListener('click', function(){
+  overlay.classList.remove('open');
+});
+overlay.addEventListener('click', function(e){
+  if (e.target === overlay) overlay.classList.remove('open');
+});
+
+modalForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+  const type = modalForm.getAttribute('data-type');
+  const config = FORMULAIRES[type];
+  const btn = modalForm.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+  modalMsg.className = 'auth-form-message';
+
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (!session) {
+    window.location.href = 'connexion.html';
+    return;
+  }
+
+  const payload = { user_id: session.user.id };
+  let fichier = null;
+
+  config.champs.forEach(function(champ){
+    if (champ.type === 'file') {
+      const inputEl = document.getElementById('champ-' + champ.id);
+      if (inputEl.files && inputEl.files[0]) fichier = inputEl.files[0];
+    } else if (champ.id === 'tags') {
+      const valeur = document.getElementById('champ-' + champ.id).value;
+      payload.tags = valeur.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    } else if (champ.id === 'annee') {
+      const valeur = document.getElementById('champ-' + champ.id).value;
+      payload.annee = valeur ? parseInt(valeur, 10) : null;
+    } else {
+      payload[champ.id] = document.getElementById('champ-' + champ.id).value;
+    }
+  });
+
+  if (fichier) {
+    const chemin = config.beniereKey + '/' + session.user.id + '/' + Date.now() + '-' + fichier.name;
+    const { error: erreurUpload } = await window.supabaseClient.storage
+      .from('infirmiere-files')
+      .upload(chemin, fichier);
+
+    if (erreurUpload) {
+      btn.disabled = false;
+      btn.textContent = 'Soumettre';
+      modalMsg.textContent = "Échec de l'envoi du fichier.";
+      modalMsg.className = 'auth-form-message show error';
+      return;
+    }
+
+    const { data: urlPublique } = window.supabaseClient.storage
+      .from('infirmiere-files')
+      .getPublicUrl(chemin);
+    payload[config.urlChamp] = urlPublique.publicUrl;
+  }
+
+  const { error } = await window.supabaseClient.from(config.table).insert(payload);
+
+  btn.disabled = false;
+  btn.textContent = 'Soumettre';
+
+  if (error) {
+    modalMsg.textContent = "Une erreur est survenue. Réessaie.";
+    modalMsg.className = 'auth-form-message show error';
+    return;
+  }
+
+  modalMsg.textContent = "Soumission envoyée avec succès.";
+  modalMsg.className = 'auth-form-message show success';
+  setTimeout(function(){ overlay.classList.remove('open'); }, 1200);
+});
+</script>
+
+<script src="partials/nav.js"></script>
+
+</body>
+</html>
