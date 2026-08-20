@@ -195,6 +195,8 @@ document.getElementById('form-profil').addEventListener('submit', async function
 
   btn.disabled = false; btn.textContent = 'Enregistrer';
 
+  if (error) console.error('Erreur Supabase update profil :', error);
+
   msg.textContent = error ? "Erreur lors de l'enregistrement." : 'Profil mis à jour.';
   msg.className = 'auth-form-message show ' + (error ? 'error' : 'success');
 });
