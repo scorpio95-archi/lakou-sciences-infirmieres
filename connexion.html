@@ -78,11 +78,29 @@ document.getElementById('form-connexion').addEventListener('submit', async funct
   const email = document.getElementById('email').value.trim();
   const mdp = document.getElementById('mdp').value;
 
-  const { error } = await window.supabaseClient.auth.signInWithPassword({ email, password: mdp });
+  if (!window.supabaseClient) {
+    console.error('window.supabaseClient est introuvable — supabase-client.js ne s\'est pas chargé ou a échoué.');
+    btn.disabled = false; btn.textContent = 'Se connecter';
+    msg.textContent = "Connexion au service impossible. Vérifie la console (F12) pour le détail.";
+    msg.className = 'auth-form-message show error';
+    return;
+  }
+
+  let error;
+  try {
+    ({ error } = await window.supabaseClient.auth.signInWithPassword({ email, password: mdp }));
+  } catch (exception) {
+    console.error('Exception pendant signInWithPassword() :', exception);
+    btn.disabled = false; btn.textContent = 'Se connecter';
+    msg.textContent = "La requête n'a pas pu partir (réseau ou configuration). Détail dans la console (F12).";
+    msg.className = 'auth-form-message show error';
+    return;
+  }
 
   btn.disabled = false; btn.textContent = 'Se connecter';
 
   if (error) {
+    console.error('Erreur Supabase signInWithPassword() :', error);
     msg.textContent = traduireErreur(error.message);
     msg.className = 'auth-form-message show error';
     return;
