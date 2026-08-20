@@ -99,15 +99,33 @@ document.getElementById('form-inscription').addEventListener('submit', async fun
 
   btn.disabled = true; btn.textContent = 'Création…';
 
-  const { data, error } = await window.supabaseClient.auth.signUp({
-    email: email,
-    password: mdp,
-    options: { data: { full_name: nom } }
-  });
+  if (!window.supabaseClient) {
+    console.error('window.supabaseClient est introuvable — supabase-client.js ne s\'est pas chargé ou a échoué.');
+    btn.disabled = false; btn.textContent = 'Créer mon compte';
+    msg.textContent = "Connexion au service impossible. Vérifie la console (F12) pour le détail.";
+    msg.className = 'auth-form-message show error';
+    return;
+  }
+
+  let data, error;
+  try {
+    ({ data, error } = await window.supabaseClient.auth.signUp({
+      email: email,
+      password: mdp,
+      options: { data: { full_name: nom } }
+    }));
+  } catch (exception) {
+    console.error('Exception pendant signUp() :', exception);
+    btn.disabled = false; btn.textContent = 'Créer mon compte';
+    msg.textContent = "La requête n'a pas pu partir (réseau ou configuration). Détail dans la console (F12).";
+    msg.className = 'auth-form-message show error';
+    return;
+  }
 
   btn.disabled = false; btn.textContent = 'Créer mon compte';
 
   if (error) {
+    console.error('Erreur Supabase signUp() :', error);
     msg.textContent = traduireErreur(error.message);
     msg.className = 'auth-form-message show error';
     return;
