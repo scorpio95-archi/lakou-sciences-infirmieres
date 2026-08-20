@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscription — Lakou Sces Infirmières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<div class="breadcrumb">
+  <a href="index.html">🏠 Lakou Sces Infirmières</a>
+  <span class="sep">›</span>
+  <span class="current">Inscription</span>
+</div>
+
+<main class="auth-main">
+  <div class="auth-card" id="carte-inscription">
+    <div class="auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg>
+    </div>
+    <h1>Rejoindre la plateforme</h1>
+    <p class="auth-sub">Ton compte est créé en tant qu'étudiant·e. Enseignant·e ? Tu pourras faire ta demande une fois connecté·e, depuis Paramètres.</p>
+
+    <div class="auth-form-message" id="msg-inscription"></div>
+
+    <form id="form-inscription">
+      <div class="field">
+        <label for="nom">Nom complet</label>
+        <input type="text" id="nom" required autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="mdp">Mot de passe</label>
+        <input type="password" id="mdp" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="confirmer">Confirmer le mot de passe</label>
+        <input type="password" id="confirmer" required minlength="6" autocomplete="new-password">
+      </div>
+      <button class="btn-primary" type="submit" id="btn-inscription-submit" style="width:100%;">Créer mon compte</button>
+    </form>
+
+    <p style="text-align:center; margin-top:18px; font-size:13.5px; color:var(--texte-mute);">
+      Déjà un compte ? <a href="connexion.html" class="auth-switch">Connecte-toi</a>
+    </p>
+  </div>
+
+  <div class="auth-card" id="carte-verifie-email" style="display:none;">
+    <div class="auth-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 6l8 7 8-7"/></svg>
+    </div>
+    <h1>Vérifie ta boîte mail</h1>
+    <p class="auth-sub">On t'a envoyé un lien de confirmation. Une fois confirmé, tu pourras te connecter.</p>
+    <a href="connexion.html" class="btn-primary" style="display:block; text-decoration:none;">Aller à la connexion</a>
+  </div>
+</main>
+
+<script>
+(async function(){
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (session) { window.location.href = 'dashboard.html'; }
+})();
+
+function traduireErreur(message){
+  if (!message) return "Une erreur est survenue. Réessaie.";
+  if (message.includes('already registered') || message.includes('already exists')) return "Un compte existe déjà avec cet email.";
+  if (message.includes('Password should be at least')) return "Le mot de passe doit contenir au moins 6 caractères.";
+  if (message.includes('invalid format') || message.includes('Unable to validate email')) return "Format d'email invalide.";
+  if (message.includes('rate limit')) return "Trop de tentatives. Réessaie dans quelques minutes.";
+  return "Une erreur est survenue. Réessaie.";
+}
+
+document.getElementById('form-inscription').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('btn-inscription-submit');
+  const msg = document.getElementById('msg-inscription');
+  msg.className = 'auth-form-message';
+
+  const nom = document.getElementById('nom').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const mdp = document.getElementById('mdp').value;
+  const confirmer = document.getElementById('confirmer').value;
+
+  if (mdp !== confirmer) {
+    msg.textContent = "Les mots de passe ne correspondent pas.";
+    msg.className = 'auth-form-message show error';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Création…';
+
+  const { data, error } = await window.supabaseClient.auth.signUp({
+    email: email,
+    password: mdp,
+    options: { data: { full_name: nom } }
+  });
+
+  btn.disabled = false; btn.textContent = 'Créer mon compte';
+
+  if (error) {
+    msg.textContent = traduireErreur(error.message);
+    msg.className = 'auth-form-message show error';
+    return;
+  }
+
+  // Confirmation email désactivée dans le projet → session immédiate
+  if (data.session) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Confirmation email requise → on attend que la personne clique le lien
+  document.getElementById('carte-inscription').style.display = 'none';
+  document.getElementById('carte-verifie-email').style.display = 'block';
+});
+</script>
+
+<script src="partials/nav.js"></script>
+</body>
+</html>
