@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formation & Révisions — Lakou Sces Infirmières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<div class="breadcrumb">
+  <a href="index.html">🏠 Lakou Sces Infirmières</a>
+  <span class="sep">›</span>
+  <span class="current">Formation & Révisions</span>
+</div>
+
+<section class="banniere-hero">
+  <div class="banniere-hero-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg>
+  </div>
+  <h1>Formation & Révisions</h1>
+  <p>Cours, fiches de révision, examens et TP archivés par la communauté étudiante — validés par les enseignant·e·s avant publication.</p>
+</section>
+
+<div class="filtres-bar">
+  <input type="text" id="champ-recherche" placeholder="Rechercher un titre…">
+  <select id="filtre-type">
+    <option value="">Tous les types</option>
+  </select>
+</div>
+
+<div class="archive-grid" id="grille-bannieres">
+  <p class="auth-sub">Chargement…</p>
+</div>
+
+<footer class="site-footer">
+  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a></p>
+</footer>
+
+<script>
+initBanniere({
+  table: 'infirmiere_formation_revisions',
+  champs: ['id','titre','description','contenu','fichier_url','type','created_at'],
+  types: [
+    ['cours','Cours'],
+    ['fiche_revision','Fiche de révision'],
+    ['examen','Examen / sujet ancien'],
+    ['tp','TP'],
+    ['exercice','Exercice']
+  ]
+});
+</script>
+<script src="bannieres.js"></script>
+<script src="partials/nav.js"></script>
+</body>
+</html>
