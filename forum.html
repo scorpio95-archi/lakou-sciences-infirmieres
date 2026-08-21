@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forum — Lakou Sces Infirmières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<div class="breadcrumb">
+  <a href="index.html">🏠 Lakou Sces Infirmières</a>
+  <span class="sep">›</span>
+  <span class="current">Forum</span>
+</div>
+
+<section class="banniere-hero">
+  <div class="banniere-hero-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5H4l2.3-3.8A8.5 8.5 0 1121 11.5z"/></svg>
+  </div>
+  <h1>Forum</h1>
+  <p>L'espace d'échange de la communauté étudiante et enseignante — réservé aux membres connecté·e·s.</p>
+</section>
+
+<main class="auth-main" id="gate-connexion" style="display:none;">
+  <div class="auth-card">
+    <p class="auth-sub">Connecte-toi pour accéder au forum.</p>
+    <a href="connexion.html" class="btn-primary" style="display:block; text-decoration:none;">Se connecter</a>
+  </div>
+</main>
+
+<div id="forum-contenu" style="display:none;">
+
+  <div class="forum-nouveau">
+    <h1 style="font-size:16px; text-align:left;">Lancer un sujet</h1>
+    <div class="auth-form-message" id="msg-nouveau-sujet"></div>
+    <form id="form-nouveau-sujet">
+      <div class="field">
+        <label for="nouveau-titre">Titre</label>
+        <input type="text" id="nouveau-titre" required>
+      </div>
+      <div class="field">
+        <label for="nouveau-contenu">Message</label>
+        <textarea id="nouveau-contenu" rows="3" required></textarea>
+      </div>
+      <button class="btn-primary" type="submit" id="btn-nouveau-sujet">Publier</button>
+    </form>
+  </div>
+
+  <div id="liste-sujets" style="max-width:640px; margin:0 auto; padding-bottom:48px;">
+    <p class="auth-sub">Chargement…</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a></p>
+</footer>
+
+<script>
+(async function () {
+  if (!window.supabaseClient) {
+    console.error('forum.html : window.supabaseClient introuvable.');
+    return;
+  }
+
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  const gate = document.getElementById('gate-connexion');
+  const contenu = document.getElementById('forum-contenu');
+
+  if (!session) {
+    gate.style.display = 'flex';
+    return;
+  }
+  contenu.style.display = 'block';
+
+  const { data: profil } = await window.supabaseClient
+    .from('profiles')
+    .select('role')
+    .eq('id', session.user.id)
+    .single();
+  const estStaff = profil && (profil.role === 'enseignant' || profil.role === 'admin');
+
+  chargerSujets(session.user.id, estStaff);
+
+  document.getElementById('form-nouveau-sujet').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-nouveau-sujet');
+    const msg = document.getElementById('msg-nouveau-sujet');
+    btn.disabled = true; btn.textContent = 'Publication…';
+
+    const { error } = await window.supabaseClient.from('infirmiere_forum_sujets').insert({
+      user_id: session.user.id,
+      titre: document.getElementById('nouveau-titre').value.trim(),
+      contenu: document.getElementById('nouveau-contenu').value.trim()
+    });
+
+    btn.disabled = false; btn.textContent = 'Publier';
+
+    if (error) {
+      console.error('Erreur création sujet :', error);
+      msg.textContent = 'Erreur lors de la publication.';
+      msg.className = 'auth-form-message show error';
+      return;
+    }
+
+    document.getElementById('form-nouveau-sujet').reset();
+    msg.className = 'auth-form-message';
+    chargerSujets(session.user.id, estStaff);
+  });
+})();
+
+async function chargerSujets(userId, estStaff) {
+  const liste = document.getElementById('liste-sujets');
+  liste.innerHTML = '<p class="auth-sub">Chargement…</p>';
+
+  const { data, error } = await window.supabaseClient
+    .from('infirmiere_forum_sujets')
+    .select('id, titre, contenu, epingle, verrouille, created_at, user_id, profiles(nom_complet)')
+    .order('epingle', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error || !data) {
+    liste.innerHTML = '<p class="auth-sub">Impossible de charger le forum pour le moment.</p>';
+    console.error('Erreur chargement forum :', error);
+    return;
+  }
+
+  if (data.length === 0) {
+    liste.innerHTML = '<p class="auth-sub">Aucun sujet pour le moment — sois le premier à en lancer un.</p>';
+    return;
+  }
+
+  liste.innerHTML = '';
+  data.forEach(function (sujet) {
+    const carte = document.createElement('div');
+    carte.className = 'sujet-card';
+
+    const date = new Date(sujet.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    const auteur = sujet.profiles ? sujet.profiles.nom_complet : 'Anonyme';
+
+    carte.innerHTML =
+      '<div class="sujet-head">' +
+        '<div>' +
+          '<p class="sujet-titre">' + sujet.titre + '</p>' +
+          '<p class="sujet-meta">' + auteur + ' · ' + date + '</p>' +
+        '</div>' +
+        '<div class="sujet-badges">' +
+          (sujet.epingle ? '<span class="pin-badge">Épinglé</span>' : '') +
+          (sujet.verrouille ? '<span class="lock-badge">Verrouillé</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="sujet-corps"></div>';
+
+    const head = carte.querySelector('.sujet-head');
+    const corps = carte.querySelector('.sujet-corps');
+
+    head.addEventListener('click', async function () {
+      const ouvert = corps.classList.contains('open');
+      document.querySelectorAll('.sujet-corps.open').forEach(function (c) { c.classList.remove('open'); });
+      if (ouvert) return;
+      corps.classList.add('open');
+      if (!corps.dataset.rempli) {
+        await remplirSujet(corps, sujet, userId, estStaff);
+        corps.dataset.rempli = '1';
+      }
+    });
+
+    liste.appendChild(carte);
+  });
+}
+
+async function remplirSujet(corps, sujet, userId, estStaff) {
+  corps.innerHTML = '<p class="auth-sub">Chargement des réponses…</p>';
+
+  const { data: messages, error } = await window.supabaseClient
+    .from('infirmiere_forum_messages')
+    .select('id, contenu, created_at, user_id, profiles(nom_complet)')
+    .eq('sujet_id', sujet.id)
+    .order('created_at', { ascending: true });
+
+  corps.innerHTML = '<p style="font-size:13.5px; margin:0 0 14px;">' + sujet.contenu.replace(/\n/g, '<br>') + '</p>';
+
+  if (estStaff) {
+    const modActions = document.createElement('div');
+    modActions.className = 'mod-actions';
+    modActions.style.marginBottom = '14px';
+    modActions.innerHTML =
+      '<button class="mod-btn ' + (sujet.epingle ? 'actif' : '') + '" data-action="epingle">' + (sujet.epingle ? 'Désépingler' : 'Épingler') + '</button>' +
+      '<button class="mod-btn ' + (sujet.verrouille ? 'actif' : '') + '" data-action="verrouille">' + (sujet.verrouille ? 'Déverrouiller' : 'Verrouiller') + '</button>';
+    corps.appendChild(modActions);
+
+    modActions.querySelectorAll('.mod-btn').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const champ = btn.getAttribute('data-action');
+        const nouvelleValeur = !sujet[champ];
+        const maj = {};
+        maj[champ] = nouvelleValeur;
+        const { error: erreurMaj } = await window.supabaseClient
+          .from('infirmiere_forum_sujets')
+          .update(maj)
+          .eq('id', sujet.id);
+        if (erreurMaj) { console.error('Erreur modération :', erreurMaj); return; }
+        sujet[champ] = nouvelleValeur;
+        chargerSujets(userId, estStaff);
+      });
+    });
+  }
+
+  if (error || !messages) {
+    corps.innerHTML += '<p class="auth-sub">Impossible de charger les réponses.</p>';
+    return;
+  }
+
+  messages.forEach(function (m) {
+    const ligne = document.createElement('div');
+    ligne.className = 'message-row';
+    const date = new Date(m.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const auteur = m.profiles ? m.profiles.nom_complet : 'Anonyme';
+    ligne.innerHTML =
+      '<span class="message-auteur">' + auteur + '</span>' +
+      '<span class="message-date">' + date + '</span>' +
+      '<p class="message-contenu">' + m.contenu.replace(/\n/g, '<br>') + '</p>';
+    corps.appendChild(ligne);
+  });
+
+  if (!sujet.verrouille || estStaff) {
+    const formulaire = document.createElement('form');
+    formulaire.className = 'reply-form';
+    formulaire.innerHTML =
+      '<textarea rows="2" placeholder="Ta réponse…" required></textarea>' +
+      '<button class="btn-primary" type="submit">Envoyer</button>';
+    formulaire.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const champTexte = formulaire.querySelector('textarea');
+      const bouton = formulaire.querySelector('button');
+      bouton.disabled = true;
+
+      const { error: erreurEnvoi } = await window.supabaseClient
+        .from('infirmiere_forum_messages')
+        .insert({ sujet_id: sujet.id, user_id: userId, contenu: champTexte.value.trim() });
+
+      bouton.disabled = false;
+      if (erreurEnvoi) { console.error('Erreur envoi réponse :', erreurEnvoi); return; }
+
+      champTexte.value = '';
+      corps.dataset.rempli = '';
+      await remplirSujet(corps, sujet, userId, estStaff);
+      corps.dataset.rempli = '1';
+    });
+    corps.appendChild(formulaire);
+  } else {
+    const verrouilleMsg = document.createElement('p');
+    verrouilleMsg.className = 'auth-sub';
+    verrouilleMsg.textContent = 'Ce sujet est verrouillé.';
+    corps.appendChild(verrouilleMsg);
+  }
+}
+</script>
+
+<script src="partials/nav.js"></script>
+</body>
+</html>
