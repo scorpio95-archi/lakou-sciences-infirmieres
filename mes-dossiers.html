@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes dossiers — Lakou Sces Infirmières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<div class="breadcrumb">
+  <a href="dashboard.html">🏠 Tableau de bord</a>
+  <span class="sep">›</span>
+  <span class="current">Mes dossiers</span>
+</div>
+
+<section class="banniere-hero">
+  <div class="banniere-hero-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-4l-2-2H9z"/></svg>
+  </div>
+  <h1>Mes dossiers</h1>
+  <p>Toutes tes soumissions, tous statuts confondus — avec le commentaire de l'enseignant·e ou admin s'il y en a un.</p>
+</section>
+
+<main class="auth-main" id="gate-connexion" style="display:none;">
+  <div class="auth-card">
+    <p class="auth-sub">Connecte-toi pour voir tes dossiers.</p>
+    <a href="connexion.html" class="btn-primary" style="display:block; text-decoration:none;">Se connecter</a>
+  </div>
+</main>
+
+<div id="dossiers-contenu" style="display:none;">
+  <div class="filtres-bar">
+    <input type="text" id="champ-recherche" placeholder="Rechercher un titre…">
+    <select id="filtre-statut">
+      <option value="">Tous les statuts</option>
+      <option value="en_attente">En attente</option>
+      <option value="valide">Validé</option>
+      <option value="rejete">Rejeté</option>
+    </select>
+    <select id="filtre-banniere">
+      <option value="">Toutes les bannières</option>
+    </select>
+  </div>
+  <div class="archive-grid" id="grille-dossiers">
+    <p class="auth-sub">Chargement…</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a> · <a href="confidentialite.html">Confidentialité</a></p>
+</footer>
+
+<script>
+const BANNIERES_DOSSIERS = [
+  { table: 'infirmiere_formation_revisions', label: 'Formation & Révisions', types: { cours: 'Cours', fiche_revision: 'Fiche de révision', examen: 'Examen / sujet ancien', tp: 'TP', exercice: 'Exercice' } },
+  { table: 'infirmiere_stages_terrain', label: 'Stages & Terrain', types: { rapport_stage: 'Rapport de stage', experience_hospitaliere: 'Expérience hospitalière', sante_communautaire: 'Santé communautaire', campagne_vaccination: 'Campagne de vaccination', sensibilisation: 'Sensibilisation', milieu_rural: 'Milieu rural', temoignage: 'Témoignage' } },
+  { table: 'infirmiere_pratiques_soins', label: 'Pratiques & Soins', types: { technique_soins: 'Technique de soins', tp_infirmier: 'TP infirmier', protocole: 'Protocole étudié', simulation: 'Simulation', materiel_pedagogique: 'Matériel pédagogique', innovation: 'Innovation étudiante' } },
+  { table: 'infirmiere_memoires_recherche', label: 'Mémoires & Recherche', types: { memoire: 'Mémoire', recherche: 'Recherche', enquete: 'Enquête', etude_terrain: 'Étude de terrain', poster: 'Poster scientifique', article: 'Article' } },
+  { table: 'infirmiere_revue', label: 'Revue Infirmière', types: { portrait: 'Portrait', parcours_ancien: "Parcours d'ancien étudiant", initiative: 'Initiative', association_promotion: 'Association / Promotion', actualite: 'Actualité', concours_opportunite: 'Concours / Opportunité', conference: 'Conférence', sur_le_terrain: 'Sur le terrain' } }
+];
+
+const LIBELLE_STATUT = {
+  en_attente: { texte: 'En attente', classe: 'attente' },
+  valide: { texte: 'Validé', classe: 'valide' },
+  rejete: { texte: 'Rejeté', classe: 'rejete' }
+};
+
+(async function () {
+  if (!window.supabaseClient) {
+    console.error('mes-dossiers.html : window.supabaseClient introuvable.');
+    return;
+  }
+
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  const gate = document.getElementById('gate-connexion');
+  const contenu = document.getElementById('dossiers-contenu');
+
+  if (!session) {
+    gate.style.display = 'flex';
+    return;
+  }
+  contenu.style.display = 'block';
+
+  const selectBanniere = document.getElementById('filtre-banniere');
+  BANNIERES_DOSSIERS.forEach(function (b) {
+    var opt = document.createElement('option');
+    opt.value = b.table; opt.textContent = b.label;
+    selectBanniere.appendChild(opt);
+  });
+
+  const grille = document.getElementById('grille-dossiers');
+
+  const reponses = await Promise.all(BANNIERES_DOSSIERS.map(function (b) {
+    return window.supabaseClient
+      .from(b.table)
+      .select('id, titre, description, contenu, fichier_url, type, status, commentaire_admin, created_at')
+      .eq('user_id', session.user.id);
+  }));
+
+  let items = [];
+  reponses.forEach(function (reponse, i) {
+    if (reponse.error || !reponse.data) {
+      console.error('Erreur chargement ' + BANNIERES_DOSSIERS[i].table + ' :', reponse.error);
+      return;
+    }
+    reponse.data.forEach(function (item) {
+      items.push(Object.assign({}, item, {
+        table: BANNIERES_DOSSIERS[i].table,
+        banniereLabel: BANNIERES_DOSSIERS[i].label,
+        typeLabel: BANNIERES_DOSSIERS[i].types[item.type] || item.type
+      }));
+    });
+  });
+
+  items.sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+
+  const champRecherche = document.getElementById('champ-recherche');
+  const filtreStatut = document.getElementById('filtre-statut');
+  const filtreBanniere = document.getElementById('filtre-banniere');
+
+  function rendre() {
+    const recherche = champRecherche.value.trim().toLowerCase();
+    const statut = filtreStatut.value;
+    const banniere = filtreBanniere.value;
+
+    const filtres = items.filter(function (i) {
+      if (statut && i.status !== statut) return false;
+      if (banniere && i.table !== banniere) return false;
+      if (recherche && (i.titre || '').toLowerCase().indexOf(recherche) === -1) return false;
+      return true;
+    });
+
+    grille.innerHTML = '';
+
+    if (filtres.length === 0) {
+      grille.innerHTML = '<p class="auth-sub">Aucun dossier pour le moment — tapote le bouton + sur ton tableau de bord pour en ajouter un.</p>';
+      return;
+    }
+
+    filtres.forEach(function (item) {
+      const carte = document.createElement('div');
+      carte.className = 'archive-card';
+
+      const statutInfo = LIBELLE_STATUT[item.status] || { texte: item.status, classe: 'attente' };
+      const date = new Date(item.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' });
+
+      carte.innerHTML =
+        '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">' +
+          '<div>' +
+            '<p class="archive-card-titre">' + (item.titre || '(sans titre)') + '</p>' +
+            '<p class="archive-card-meta">' + item.banniereLabel + ' · ' + item.typeLabel + ' · ' + date + '</p>' +
+          '</div>' +
+          '<span class="statut-pill ' + statutInfo.classe + '">' + statutInfo.texte + '</span>' +
+        '</div>' +
+        (item.description ? '<p class="archive-card-desc">' + item.description + '</p>' : '') +
+        (item.status === 'rejete' && item.commentaire_admin
+          ? '<p class="archive-card-desc" style="background:var(--rose-pale); padding:8px 10px; border-radius:8px; margin-top:8px;"><strong>Commentaire :</strong> ' + item.commentaire_admin + '</p>'
+          : '') +
+        '<div class="archive-card-body"></div>' +
+        (item.contenu || item.fichier_url ? '<button class="archive-card-toggle">Voir plus →</button>' : '');
+
+      const corps = carte.querySelector('.archive-card-body');
+      const bouton = carte.querySelector('.archive-card-toggle');
+
+      if (bouton) {
+        corps.style.display = 'none';
+        bouton.addEventListener('click', function () {
+          const ouvert = corps.style.display === 'block';
+          corps.style.display = ouvert ? 'none' : 'block';
+          bouton.textContent = ouvert ? 'Voir plus →' : 'Réduire ↑';
+          if (!ouvert && !corps.dataset.rempli) {
+            corps.innerHTML =
+              (item.contenu ? '<p>' + item.contenu.replace(/\n/g, '<br>') + '</p>' : '') +
+              (item.fichier_url ? '<a href="' + item.fichier_url + '" target="_blank" rel="noopener" class="btn-secondary" style="margin-top:8px; display:inline-block;">Ouvrir le fichier ↗</a>' : '');
+            corps.dataset.rempli = '1';
+          }
+        });
+      }
+
+      grille.appendChild(carte);
+    });
+  }
+
+  champRecherche.addEventListener('input', rendre);
+  filtreStatut.addEventListener('change', rendre);
+  filtreBanniere.addEventListener('change', rendre);
+
+  rendre();
+})();
+</script>
+
+<script src="partials/nav.js"></script>
+</body>
+</html>
