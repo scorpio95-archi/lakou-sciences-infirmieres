@@ -48,18 +48,22 @@
 
 <script src="bannieres.js"></script>
 <script>
-initBanniere({
-  table: 'infirmiere_memoires_recherche',
-  champs: ['id','titre','description','contenu','fichier_url','type','tags','created_at'],
-  types: [
-    ['memoire','Mémoire'],
-    ['recherche','Recherche'],
-    ['enquete','Enquête'],
-    ['etude_terrain','Étude de terrain'],
-    ['poster','Poster scientifique'],
-    ['article','Article']
-  ]
-});
+if (typeof initBanniere !== 'function') {
+  document.getElementById('grille-bannieres').innerHTML = '<p class="auth-sub">Erreur : bannieres.js est introuvable. Vérifie qu\'il est bien déployé à la racine du site.</p>';
+} else {
+  initBanniere({
+    table: 'infirmiere_memoires_recherche',
+    champs: ['id','titre','description','contenu','fichier_url','type','tags','created_at'],
+    types: [
+      ['memoire','Mémoire'],
+      ['recherche','Recherche'],
+      ['enquete','Enquête'],
+      ['etude_terrain','Étude de terrain'],
+      ['poster','Poster scientifique'],
+      ['article','Article']
+    ]
+  });
+}
 </script>
 <script src="partials/nav.js"></script>
 </body>
