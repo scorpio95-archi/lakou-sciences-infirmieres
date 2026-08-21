@@ -45,19 +45,23 @@
 
 <script src="bannieres.js"></script>
 <script>
-initBanniere({
-  table: 'infirmiere_stages_terrain',
-  champs: ['id','titre','description','contenu','fichier_url','type','lieu','annee','created_at'],
-  types: [
-    ['rapport_stage','Rapport de stage'],
-    ['experience_hospitaliere','Expérience hospitalière'],
-    ['sante_communautaire','Santé communautaire'],
-    ['campagne_vaccination','Campagne de vaccination'],
-    ['sensibilisation','Sensibilisation'],
-    ['milieu_rural','Milieu rural'],
-    ['temoignage','Témoignage']
-  ]
-});
+if (typeof initBanniere !== 'function') {
+  document.getElementById('grille-bannieres').innerHTML = '<p class="auth-sub">Erreur : bannieres.js est introuvable. Vérifie qu\'il est bien déployé à la racine du site.</p>';
+} else {
+  initBanniere({
+    table: 'infirmiere_stages_terrain',
+    champs: ['id','titre','description','contenu','fichier_url','type','lieu','annee','created_at'],
+    types: [
+      ['rapport_stage','Rapport de stage'],
+      ['experience_hospitaliere','Expérience hospitalière'],
+      ['sante_communautaire','Santé communautaire'],
+      ['campagne_vaccination','Campagne de vaccination'],
+      ['sensibilisation','Sensibilisation'],
+      ['milieu_rural','Milieu rural'],
+      ['temoignage','Témoignage']
+    ]
+  });
+}
 </script>
 <script src="partials/nav.js"></script>
 </body>
