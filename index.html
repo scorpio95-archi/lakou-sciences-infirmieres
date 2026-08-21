@@ -165,6 +165,11 @@
   </div>
 </section>
 
+<section class="admin-profile-section" id="section-admin-profile" style="display:none;">
+  <p class="split-eyebrow">— Administration</p>
+  <div id="admin-profile-liste"></div>
+</section>
+
 <footer class="site-footer">
   <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a> · <a href="confidentialite.html">Confidentialité</a></p>
 </footer>
@@ -186,6 +191,35 @@
     const total = reponses.reduce(function (sum, r) { return sum + (r.count || 0); }, 0);
     document.getElementById('stat-archives').textContent = total;
   } catch (e) { console.error('Compteur archives indisponible :', e); }
+
+  try {
+    const { data: admins, error } = await window.supabaseClient
+      .from('profiles')
+      .select('nom_complet, bio, avatar_url')
+      .eq('role', 'admin');
+
+    if (error) { console.error('Profil admin indisponible :', error); }
+
+    if (admins && admins.length > 0) {
+      const conteneur = document.getElementById('admin-profile-liste');
+      conteneur.innerHTML = '';
+      admins.forEach(function (a) {
+        const carte = document.createElement('div');
+        carte.className = 'admin-profile-card';
+        carte.innerHTML =
+          (a.avatar_url
+            ? '<img class="admin-profile-avatar" src="' + a.avatar_url + '" alt="">'
+            : '<div class="admin-profile-avatar">👤</div>') +
+          '<div class="admin-profile-info">' +
+            '<p class="admin-profile-role">Administration</p>' +
+            '<p class="admin-profile-nom">' + (a.nom_complet || 'Admin') + '</p>' +
+            (a.bio ? '<p class="admin-profile-bio">' + a.bio + '</p>' : '') +
+          '</div>';
+        conteneur.appendChild(carte);
+      });
+      document.getElementById('section-admin-profile').style.display = 'block';
+    }
+  } catch (e) { console.error('Profil admin indisponible :', e); }
 })();
 </script>
 
