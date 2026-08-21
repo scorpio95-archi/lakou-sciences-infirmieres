@@ -67,12 +67,27 @@
     var lienDashboard = document.getElementById('lien-dashboard');
     var lienDossiers = document.getElementById('lien-mes-dossiers');
 
+    if (!window.supabaseClient) {
+      console.error('nav.js : window.supabaseClient est introuvable — supabase-client.js ne s\'est pas chargé avant nav.js.');
+      return;
+    }
+
     try {
       var res = await window.supabaseClient.auth.getSession();
       var session = res.data.session;
+      console.log('nav.js : session', session ? 'trouvée pour ' + session.user.email : 'absente');
+
       if (session) {
-        if (lienDashboard) lienDashboard.style.display = '';
-        if (lienDossiers) lienDossiers.style.display = '';
+        if (lienDashboard) {
+          lienDashboard.style.removeProperty('display');
+        } else {
+          console.error('nav.js : #lien-dashboard introuvable dans le DOM.');
+        }
+        if (lienDossiers) {
+          lienDossiers.style.removeProperty('display');
+        } else {
+          console.error('nav.js : #lien-mes-dossiers introuvable dans le DOM.');
+        }
         if (btnConnexion) {
           btnConnexion.textContent = 'Déconnexion';
           btnConnexion.setAttribute('href', '#');
@@ -84,7 +99,7 @@
         }
       }
     } catch (err) {
-      console.error('Session non vérifiable :', err);
+      console.error('nav.js : session non vérifiable :', err);
     }
   }
 })();
