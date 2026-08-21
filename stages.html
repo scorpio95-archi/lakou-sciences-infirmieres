@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stages & Terrain — Lakou Sces Infirmières</title>
+<title>Revue Infirmière — Lakou Sces Infirmières</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -17,15 +17,15 @@
 <div class="breadcrumb">
   <a href="index.html">🏠 Lakou Sces Infirmières</a>
   <span class="sep">›</span>
-  <span class="current">Stages & Terrain</span>
+  <span class="current">Revue Infirmière</span>
 </div>
 
 <section class="banniere-hero">
   <div class="banniere-hero-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V9l8-6 8 6v12"/><path d="M12 21v-7M9 17h6"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg>
   </div>
-  <h1>Stages & Terrain</h1>
-  <p>Rapports de stage, santé communautaire, expériences en milieu rural — la mémoire du terrain, promotion après promotion.</p>
+  <h1>Revue Infirmière</h1>
+  <p>Portraits, initiatives, actualités et rencontres de terrain — le cœur communautaire du réseau.</p>
 </section>
 
 <div class="filtres-bar">
@@ -40,7 +40,7 @@
 </div>
 
 <footer class="site-footer">
-  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a></p>
+  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a> · <a href="confidentialite.html">Confidentialité</a></p>
 </footer>
 
 <script src="bannieres.js"></script>
@@ -49,16 +49,17 @@ if (typeof initBanniere !== 'function') {
   document.getElementById('grille-bannieres').innerHTML = '<p class="auth-sub">Erreur : bannieres.js est introuvable. Vérifie qu\'il est bien déployé à la racine du site.</p>';
 } else {
   initBanniere({
-    table: 'infirmiere_stages_terrain',
-    champs: ['id','titre','description','contenu','fichier_url','type','lieu','annee','created_at'],
+    table: 'infirmiere_revue',
+    champs: ['id','titre','description','contenu','fichier_url','type','created_at'],
     types: [
-      ['rapport_stage','Rapport de stage'],
-      ['experience_hospitaliere','Expérience hospitalière'],
-      ['sante_communautaire','Santé communautaire'],
-      ['campagne_vaccination','Campagne de vaccination'],
-      ['sensibilisation','Sensibilisation'],
-      ['milieu_rural','Milieu rural'],
-      ['temoignage','Témoignage']
+      ['portrait','Portrait'],
+      ['parcours_ancien','Parcours d\'ancien étudiant'],
+      ['initiative','Initiative'],
+      ['association_promotion','Association / Promotion'],
+      ['actualite','Actualité'],
+      ['concours_opportunite','Concours / Opportunité'],
+      ['conference','Conférence'],
+      ['sur_le_terrain','Sur le terrain']
     ]
   });
 }
