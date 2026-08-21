@@ -85,7 +85,7 @@ document.getElementById('form-contact').addEventListener('submit', async functio
 
   let error;
   try {
-    ({ error } = await window.supabaseClient.functions.invoke('contact', { body: payload }));
+    ({ error } = await window.supabaseClient.functions.invoke('send-message-email', { body: payload }));
   } catch (exception) {
     console.error('Exception envoi contact :', exception);
     btn.disabled = false; btn.textContent = 'Envoyer';
