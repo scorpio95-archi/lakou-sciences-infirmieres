@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confidentialité — Lakou Sces Infirmières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<div id="lakou-header"></div>
+
+<div class="breadcrumb">
+  <a href="index.html">🏠 Lakou Sces Infirmières</a>
+  <span class="sep">›</span>
+  <span class="current">Confidentialité</span>
+</div>
+
+<section class="banniere-hero">
+  <div class="banniere-hero-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>
+  </div>
+  <h1>Confidentialité</h1>
+  <p>Ce que la plateforme collecte, pourquoi, et comment c'est protégé.</p>
+</section>
+
+<section class="split-section" style="display:block; max-width:680px;">
+  <div class="split-content">
+
+    <p class="split-eyebrow">— Ce que nous collectons</p>
+    <ul class="checklist">
+      <li>Ton email et mot de passe, gérés par le service d'authentification (jamais stockés en clair)</li>
+      <li>Ton nom complet, une bio courte et une photo de profil si tu choisis d'en ajouter une</li>
+      <li>Les contenus que tu soumets (titres, descriptions, fichiers) et tes messages sur le forum</li>
+    </ul>
+    <p>Nous ne demandons rien de plus que ce qui est nécessaire au fonctionnement de la plateforme.</p>
+
+    <p class="split-eyebrow" style="margin-top:28px;">— Pourquoi</p>
+    <p>Ces informations servent uniquement à faire fonctionner la plateforme : t'identifier, afficher ton profil aux enseignant·e·s et admins, permettre la validation de tes soumissions, et faire vivre le forum.</p>
+
+    <p class="split-eyebrow" style="margin-top:28px;">— Qui y a accès</p>
+    <ul class="checklist">
+      <li>Toi, pour tes propres informations et soumissions</li>
+      <li>Les enseignant·e·s et admins, pour valider ou refuser une soumission</li>
+      <li>Le grand public, uniquement pour les contenus explicitement validés et publiés</li>
+    </ul>
+    <p>L'accès aux données est contrôlé au niveau de la base de données elle-même (règles de sécurité au niveau des lignes) — pas seulement dans l'interface.</p>
+
+    <p class="split-eyebrow" style="margin-top:28px;">— Hébergement et sous-traitants</p>
+    <p>La base de données et l'authentification sont hébergées par Supabase. L'envoi d'emails (confirmation de compte, formulaire de contact) passe par Resend. Aucune de ces informations n'est vendue, louée, ou partagée à des fins publicitaires — la plateforme n'affiche aucune publicité.</p>
+
+    <p class="split-eyebrow" style="margin-top:28px;">— Tes droits</p>
+    <p>Tu peux corriger tes informations à tout moment depuis Paramètres. Pour supprimer ton compte ou tes données, écris-nous via la page Contact — la demande sera traitée par un·e admin de la plateforme.</p>
+
+    <p class="split-eyebrow" style="margin-top:28px;">— Cookies</p>
+    <p>Aucun cookie publicitaire ou traceur tiers. Seule une donnée technique de session (nécessaire pour rester connecté·e) est conservée localement sur ton appareil.</p>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a> · <a href="confidentialite.html">Confidentialité</a></p>
+</footer>
+
+<script src="partials/nav.js"></script>
+</body>
+</html>
