@@ -43,20 +43,24 @@
   <p>Lakou Sces Infirmières — un réseau <a href="https://lakou-inivesite.example">Lakou Inivesite</a></p>
 </footer>
 
-<script>
-initBanniere({
-  table: 'infirmiere_formation_revisions',
-  champs: ['id','titre','description','contenu','fichier_url','type','created_at'],
-  types: [
-    ['cours','Cours'],
-    ['fiche_revision','Fiche de révision'],
-    ['examen','Examen / sujet ancien'],
-    ['tp','TP'],
-    ['exercice','Exercice']
-  ]
-});
-</script>
 <script src="bannieres.js"></script>
+<script>
+if (typeof initBanniere !== 'function') {
+  document.getElementById('grille-bannieres').innerHTML = '<p class="auth-sub">Erreur : bannieres.js est introuvable. Vérifie qu\'il est bien déployé à la racine du site.</p>';
+} else {
+  initBanniere({
+    table: 'infirmiere_formation_revisions',
+    champs: ['id','titre','description','contenu','fichier_url','type','created_at'],
+    types: [
+      ['cours','Cours'],
+      ['fiche_revision','Fiche de révision'],
+      ['examen','Examen / sujet ancien'],
+      ['tp','TP'],
+      ['exercice','Exercice']
+    ]
+  });
+}
+</script>
 <script src="partials/nav.js"></script>
 </body>
 </html>
